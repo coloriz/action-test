@@ -8,7 +8,7 @@ on:
 
 env:
   IMAGE_NAME: action-test
-  ARCHIVE_NAME: $IMAGE_NAME-${{ github.run_number }}.tar.gz
+  ARCHIVE_NAME: action-test-${{ github.run_number }}.tar.gz
 
 jobs:
 
@@ -32,4 +32,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: docker-image
-        path: ${ARCHIVE_NAME}
+        path: ${{ env.ARCHIVE_NAME }}
