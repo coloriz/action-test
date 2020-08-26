@@ -8,6 +8,7 @@ on:
 
 env:
   IMAGE_NAME: action-test
+  ARCHIVE_NAME: $IMAGE_NAME-${{ github.run_number }}.tar.gz
 
 jobs:
 
@@ -25,7 +26,10 @@ jobs:
         docker build --file Dockerfile --tag ${IMAGE_NAME}:${{ github.run_number }} --tag ${IMAGE_NAME}:latest .
     
     - name: Save the image to a tar.gz archive
-      run: docker save ${IMAGE_NAME} | gzip > ${IMAGE_NAME}-${{ github.run_number }}.tar.gz
+      run: docker save ${IMAGE_NAME} | gzip > ${ARCHIVE_NAME}
     
-    - name: Show current directory
-      run: ls -al
+    - name: Upload the archive
+      uses: actions/upload-artifact@v2
+      with:
+        name: docker-image
+        path: ${ARCHIVE_NAME}
