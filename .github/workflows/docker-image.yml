@@ -46,7 +46,8 @@ jobs:
         SSH_PORT: ${{ secrets.SSH_PORT }}
         SSH_RSA: ${{ secrets.SSH_RSA }}
       run: |
+        mkdir -m 700 ~/.ssh
+        ssh-keyscan -t rsa -H -p ${SSH_PORT} ${SERVER_ADDRESS} >> ~/.ssh/known_hosts
         echo "${SSH_RSA}" > id_rsa
         chmod 600 id_rsa
-        ssh-keyscan -t rsa -H -p ${SSH_PORT} ${SERVER_ADDRESS} >> ~/.ssh/known_hosts
         ssh -p ${SSH_PORT} -i id_rsa github.cicd@${SERVER_ADDRESS} scp
