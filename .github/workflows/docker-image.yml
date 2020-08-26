@@ -33,7 +33,7 @@ jobs:
   
   deploy:
     name: Deploy to a server
-    needs: build
+    # needs: build
     runs-on: ubuntu-latest
     steps:
     # - name: Download the image
