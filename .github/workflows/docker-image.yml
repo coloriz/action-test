@@ -11,35 +11,35 @@ env:
   ARCHIVE_NAME: action-test-${{ github.run_number }}.tar.gz
 
 jobs:
-  # build:
-  #   name: Build the Docker image and archive it
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Build the Docker image
-  #     run: |
-  #       echo IMAGE_NAME=${IMAGE_NAME}
-  #       echo VERSION=${{ github.run_number }}
-  #       docker build --file Dockerfile --tag ${IMAGE_NAME}:${{ github.run_number }} --tag ${IMAGE_NAME}:latest .
-  #   - name: Save the image to a tar.gz archive
-  #     run: |
-  #       echo ARCHIVE_NAME=${ARCHIVE_NAME}
-  #       docker save ${IMAGE_NAME} | gzip > ${ARCHIVE_NAME}
-  #   - name: Upload the image
-  #     uses: actions/upload-artifact@v2
-  #     with:
-  #       name: docker-image
-  #       path: ${{ env.ARCHIVE_NAME }}
+  build:
+    name: Build the Docker image and archive it
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: |
+        echo IMAGE_NAME=${IMAGE_NAME}
+        echo VERSION=${{ github.run_number }}
+        docker build --file Dockerfile --tag ${IMAGE_NAME}:${{ github.run_number }} --tag ${IMAGE_NAME}:latest .
+    - name: Save the image to a tar.gz archive
+      run: |
+        echo ARCHIVE_NAME=${ARCHIVE_NAME}
+        docker save ${IMAGE_NAME} | gzip > ${ARCHIVE_NAME}
+    - name: Upload the image
+      uses: actions/upload-artifact@v2
+      with:
+        name: docker-image
+        path: ${{ env.ARCHIVE_NAME }}
   
   deploy:
     name: Deploy to a server
-    # needs: build
+    needs: build
     runs-on: ubuntu-latest
     steps:
-    # - name: Download the image
-    #   uses: actions/download-artifact@v2
-    #   with:
-    #     name: docker-image
+    - name: Download the image
+      uses: actions/download-artifact@v2
+      with:
+        name: docker-image
     - name: Upload to the server
       env:
         SERVER_ADDRESS: ${{ secrets.SERVER_ADDRESS }}
@@ -50,4 +50,5 @@ jobs:
         ssh-keyscan -H -p ${SSH_PORT} ${SERVER_ADDRESS} >> ~/.ssh/known_hosts
         echo "${SSH_RSA}" > id_rsa
         chmod 600 id_rsa
-        ssh -p ${SSH_PORT} -i id_rsa github.cicd@${SERVER_ADDRESS} scp
+        scp -P ${SSH_PORT} -i id_rsa ${ARCHIVE_NAME} github.cicd@${SERVER_ADDRESS}:/volume1/docker/images/${ARCHIVE_NAME}
+        ssh -p ${SSH_PORT} -i id_rsa github.cicd@${SERVER_ADDRESS} /usr/local/bin/docker load < /volume1/docker/images/${ARCHIVE_NAME}
