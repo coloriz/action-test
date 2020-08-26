@@ -35,20 +35,22 @@ jobs:
     name: Deploy to a server
     needs: build
     runs-on: ubuntu-latest
+    env:
+      SERVER_ADDRESS: ${{ secrets.SERVER_ADDRESS }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_RSA: ${{ secrets.SSH_RSA }}
     steps:
     - name: Download the image
       uses: actions/download-artifact@v2
       with:
         name: docker-image
-    - name: Upload to the server
-      env:
-        SERVER_ADDRESS: ${{ secrets.SERVER_ADDRESS }}
-        SSH_PORT: ${{ secrets.SSH_PORT }}
-        SSH_RSA: ${{ secrets.SSH_RSA }}
+    - name: Configure a SSH connection
       run: |
         mkdir -m 700 ~/.ssh
         ssh-keyscan -H -p ${SSH_PORT} ${SERVER_ADDRESS} >> ~/.ssh/known_hosts
         echo "${SSH_RSA}" > id_rsa
         chmod 600 id_rsa
+    - name: Upload to the server
+      run: |
         scp -P ${SSH_PORT} -i id_rsa ${ARCHIVE_NAME} github.cicd@${SERVER_ADDRESS}:/volume1/docker/images/${ARCHIVE_NAME}
-        ssh -p ${SSH_PORT} -i id_rsa github.cicd@${SERVER_ADDRESS} /usr/local/bin/docker load < /volume1/docker/images/${ARCHIVE_NAME}
+        ssh -p ${SSH_PORT} -i id_rsa github.cicd@${SERVER_ADDRESS} "/usr/local/bin/docker load < /volume1/docker/images/${ARCHIVE_NAME}"
