@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  IMAGE_NAME: action-test
+
 jobs:
 
   build:
@@ -14,8 +17,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    
     - name: Build the Docker image
       run: |
-        env
-        docker build --file Dockerfile --tag my-image-name:$(date +%s) .
-        docker save my-image-name | gzip > my-image-name.tar.gz
+        echo IMAGE_NAME=${IMAGE_NAME}
+        echo VERSION=${{ github.run_number }}
+        docker build --file Dockerfile --tag ${IMAGE_NAME}:${{ github.run_number }} --tag ${IMAGE_NAME}:latest .
+    
+    - name: Save the image to a tar.gz archive
+      run: docker save ${IMAGE_NAME} | gzip > ${IMAGE_NAME}-${{ github.run_number }}.tar.gz
+    
+    - name: Show current directory
+      run: ls -al
