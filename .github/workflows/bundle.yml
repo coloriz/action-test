@@ -1,4 +1,4 @@
-name: Bundle with PyInstaller
+name: Bundle and Release
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 env:
-  BUNDLE_NAME: imz
+  BUNDLE_NAME: izms
 
 defaults:
   run:
@@ -32,17 +32,30 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
-    - name: Determine OS path separator (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        echo "I'm Windows!"
-        pwd
-    - name: Determine OS path separator (Linux, macOS)
-      if: runner.os != 'Windows'
-      run: |
-        echo "I'm not Windows!"
-        pwd
     - name: Bundle with PyInstaller
       run: |
         PATHSEP=$(python -c "import os; print(os.pathsep)")
-        pyinstaller --onefile --add-data "README.md${PATHSEP}$README.md" run.py
+        pyinstaller --onefile --add-data "README.md${PATHSEP}$README.md" --name "${{ env.BUNDLE_NAME }}" run.py
+        cp config.json README.md dist/
+    - name: Archive build
+      id: archive
+      run: |
+        PKG_NAME=$(python -c "import sys; from run import __title__, __version__; print(f'{__title__}-v{__version__}-{sys.platform}')")
+        ARCHIVE="${PKG_NAME}.zip"
+        echo "::set-output name=filename::$ARCHIVE"
+        mv dist "$PKG_NAME"
+        zip -r "$ARCHIVE" "$PKG_NAME"
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: archives
+        path: ${{ steps.archive.outputs.filename }}
+# release:
+#     - name: Release
+#       uses: softprops/action-gh-release@v1
+#       if: startsWith(github.ref, 'refs/tags/')
+#       with:
+#         files: ${{ steps.archive.outputs.filename }}
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
