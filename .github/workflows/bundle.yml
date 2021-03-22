@@ -10,7 +10,7 @@ env:
   BUNDLE_NAME: imz
 
 jobs:
-  build-linux:
+  build:
     name: Bundle scripts
     strategy:
       matrix:
@@ -30,4 +30,5 @@ jobs:
         pip install -r requirements-dev.txt
     - name: Bundle with PyInstaller
       run: |
-        pyinstaller --onefile --add-data "README.md:README.md" run.py
+        PATHSEP=$(python -c "import os; print(os.pathsep)")
+        pyinstaller --onefile --add-data "README.md${PATHSEP}README.md" run.py
