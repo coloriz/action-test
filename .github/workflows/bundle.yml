@@ -42,4 +42,4 @@ jobs:
         PATHSEP=":"
     - name: Bundle with PyInstaller
       run: |
-        pyinstaller --onefile --add-data "README.md${PATHSEP}$README.md" run.py
+        pyinstaller --onefile --add-data "README.md${PATHSEP}README.md" run.py
