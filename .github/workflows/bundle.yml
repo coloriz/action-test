@@ -2,9 +2,8 @@ name: Bundle and Release
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    tags:
+      - 'v*'
 
 env:
   BUNDLE_NAME: izms
