@@ -34,7 +34,7 @@ jobs:
     - name: Bundle with PyInstaller
       run: |
         PATHSEP=$(python -c "import os; print(os.pathsep)")
-        pyinstaller --onefile --add-data "README.md${PATHSEP}$README.md" --name "${{ env.BUNDLE_NAME }}" run.py
+        pyinstaller --onefile --add-data "README.md${PATHSEP}$README.md" --name "${{ env.BUNDLE_NAME }}" --icon com.ca-smart.izonemail.ico run.py
         cp config.json README.md dist/
     - name: Archive build
       id: archive
