@@ -28,7 +28,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
-    - name: Bundle with PyInstaller
+    - name: Bundle with PyInstaller (Windows)
+      if: runner.os == 'Windows'
       run: |
-        PATHSEP=$(python -c "import os; print(os.pathsep)")
-        pyinstaller --onefile --add-data "README.md${PATHSEP}README.md" run.py
+        pyinstaller --onefile --add-data "README.md;README.md" run.py
+    - name: Bundle with PyInstaller (Linux, macOS)
+      if: runner.os != 'Windows'
+      run: |
+        pyinstaller --onefile --add-data "README.md:README.md" run.py
