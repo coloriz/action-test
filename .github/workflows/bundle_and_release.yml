@@ -2,8 +2,7 @@ name: Bundle and Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [ master ]
 
 env:
   BUNDLE_NAME: izms
@@ -34,7 +33,7 @@ jobs:
     - name: Bundle with PyInstaller
       run: |
         PATHSEP=$(python -c "import os; print(os.pathsep)")
-        pyinstaller --onefile --add-data "README.md${PATHSEP}$README.md" --name "${{ env.BUNDLE_NAME }}" --icon com.ca-smart.izonemail.ico run.py
+        pyinstaller --onefile --add-data "izonemail/assets${PATHSEP}izonemail/assets" --name "${{ env.BUNDLE_NAME }}" --icon "izonemail/assets/com.ca-smart.izonemail.ico" run.py
         cp config.json README.md dist/
     - name: Archive build
       id: archive
@@ -49,18 +48,3 @@ jobs:
       with:
         name: executables
         path: ${{ steps.archive.outputs.filename }}
-  release:
-    name: Release
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Download artifacts
-      uses: actions/download-artifact@v2
-      with:
-        name: executables
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: '*.zip'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
