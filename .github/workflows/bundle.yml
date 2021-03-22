@@ -44,11 +44,11 @@ jobs:
         ARCHIVE="${PKG_NAME}.zip"
         echo "::set-output name=filename::$ARCHIVE"
         mv dist "$PKG_NAME"
-        zip -r "$ARCHIVE" "$PKG_NAME"
+        python -m zipfile -c "$ARCHIVE" "$PKG_NAME"
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: archives
+        name: executables
         path: ${{ steps.archive.outputs.filename }}
 # release:
 #     - name: Release
@@ -58,4 +58,3 @@ jobs:
 #         files: ${{ steps.archive.outputs.filename }}
 #       env:
 #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
